@@ -1,31 +1,70 @@
-from reportlab.pdfgen.canvas import Canvas
-from reportlab.lib.units import inch
+from pathlib import Path
+import fitz
+import pdb
 
 
-class NDA():
+#can get fields from pdf templates
+#can pull in specific pdf templates
+#can pull from s3
+#can reach out to S3
+
+class NDA(Object):
     '''
-        This class is responsible for overlaying signatures on selected generated NDA PDF's
-
-        nda_object = NDA("arnolds_agreement")
-        nda_object.select_template("nda_agreement")
-        nda_object.sign("arnolds_signature.jpg")
+        This Module is responsible for writing signatures to PDF's and uploading to a Document Object Store
+        PyMuPDF Docs:  https://pymupdf.readthedocs.io/en/latest/index.html
+        
+        example: 
+        file = NDA("./assets/nda_basic.pdf")
+        file.select_template("")
     '''
+
+    FIELD_TYPE = {
+        0: "PDF_WIDGET_TYPE_UNKNOWN",
+        6: "PDF_WIDGET_TYPE_SIGNATURE",
+        7: "PDF_WIDGET_TYPE_TEXT",
+    }
+
+    def __init__(self):
+        self.file = None
+      
+    def find_pdf_template(self, relative_file_path):
+        '''
+            Finds file and stores file in memory
+            returns:  void
+        '''
+        try:
+            self.file = fitz.open(relative_file_path)
+        except:
+            print(f"No PDF file exists at {relative_file_path}")
     
-    def __init__(self, filename):
+    def _parse_fields_on_page(self, document, page_number):
         '''
-            Reportlab Canvas Constructor - https://www.reportlab.com/docs/reportlab-userguide.pdf
-            ( filename, pagesize=(595.27,841.89), bottomup = 1, pageCompression=0, encoding=rl_config.defaultEncoding, verbosity=0, encrypt=None):
+            Given page number returns form fields
+            returns:  list[field_types]
         '''
-        self.canvas = Canvas(filename, pagesize=(8.5 * inch, 11 * inch), bottomup=0)
+        if page_number > document.pages() || page_number < 0:
+            raise ValueError("Page does not exist.")
+        
+        page = document.load_page(page_number)
+        fields = [field for field in page.widgets()]
+        return fields
 
-    def select_template(self, filename):
-        pass
+    def detect_field_type(self, field)
+        return FIELD_TYPE[field.field_type]
 
-    def sign(self, signature):
-        pass
+    def fill_out_field(self, field, input):
+        if FIELD_TYPE[field.field_type] == "PDF_WIDGET_TYPE_TEXT":
+            #inputs are dangerous, but this is a first take
+            field.field_value = input
+            field.update()
+
+        file = self.file
+        page = file.reload_page(page)
+        file.need_appearances(value=True)
+        file.save("./assets/nda_basic_copy.pdf")
 
 
 if __name__ == '__main__':
-    pdf = NDA('example.pdf')
+    relative_file_path = Path('./assets/basic_nda.pdf')
     print(f"invoking canvas __to_s  and display to console {pdf}")
-
+    
