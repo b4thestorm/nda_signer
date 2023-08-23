@@ -19,25 +19,42 @@ class NDA(Object):
     '''
 
     FIELD_TYPE = {
-        0: "PDF_WIDGET_TYPE_UNKNOWN",
         6: "PDF_WIDGET_TYPE_SIGNATURE",
         7: "PDF_WIDGET_TYPE_TEXT",
     }
 
     def __init__(self):
-        self.file = None
-      
-    def find_pdf_template(self, relative_file_path):
-        '''
-            Finds file and stores file in memory
-            returns:  void
-        '''
         try:
             self.file = fitz.open(relative_file_path)
         except:
             print(f"No PDF file exists at {relative_file_path}")
     
-    def _parse_fields_on_page(self, document, page_number):
+    def detect_field_type(self, field)
+        if not hasattr(FIELD_TYPE, field.field_type):
+            raise ValueError("field type not supported")
+        return FIELD_TYPE[field.field_type]
+
+    def fill_text_field(field, input):
+        #NOTE:inputs are dangerous, but this is a first take
+        field.field_value = input
+        field.update()
+
+    def fill_out_field(self, field, input):
+        field_type = detect_field_type(field)
+
+        match field_type:
+            case "PDF_WIDGET_TYPE_TEXT":
+                fill_text_field(field, input)
+            case "PDF_WIDGET_TYPE_SIGNATURE":
+                pass
+
+    def save_and_generate_file():
+        file = self.file
+        page = file.reload_page(page)
+        file.need_appearances(value=True)
+        file.save("./assets/nda_basic_copy.pdf")
+   
+   def _parse_fields_on_page(self, document, page_number):
         '''
             Given page number returns form fields
             returns:  list[field_types]
@@ -48,21 +65,6 @@ class NDA(Object):
         page = document.load_page(page_number)
         fields = [field for field in page.widgets()]
         return fields
-
-    def detect_field_type(self, field)
-        return FIELD_TYPE[field.field_type]
-
-    def fill_out_field(self, field, input):
-        if FIELD_TYPE[field.field_type] == "PDF_WIDGET_TYPE_TEXT":
-            #inputs are dangerous, but this is a first take
-            field.field_value = input
-            field.update()
-
-        file = self.file
-        page = file.reload_page(page)
-        file.need_appearances(value=True)
-        file.save("./assets/nda_basic_copy.pdf")
-
 
 if __name__ == '__main__':
     relative_file_path = Path('./assets/basic_nda.pdf')
