@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-+jx+h03&@74t(jo9pcnd_v=y9*2z4q=y!^io=ah6+9bhffku)x
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+AUTH_USER_MODEL = "users.CustomUser"
 
 # Application definition
 
@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "users",
+    "contract"
 ]
 
 MIDDLEWARE = [
@@ -74,9 +76,11 @@ WSGI_APPLICATION = "nda_signer.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'nda',
+        'HOST': 'localhost',
+        'PORT': 5432,
     }
 }
 
